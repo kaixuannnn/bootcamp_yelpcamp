@@ -13,7 +13,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
-// const dbUrl = process.env.DB_URL;
+const dbUrl = process.env.DB_URL;
 
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
@@ -23,7 +23,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoDBStore = require("connect-mongo")(session);
 
 
-const dbUrl = 'mongodb://localhost:27017/yelp-camp';
+// const dbUrl = 'mongodb://localhost:27017/yelp-camp';
 mongoose.connect(dbUrl, {   
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -46,10 +46,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(mongoSanitize({
     replaceWith: '_'
 }))
-
+const secret = process.env.SECRET || 'abettersecret!';
 const store = new MongoDBStore({
     url: dbUrl, 
-    secret : 'abettersecret!',
+    secret,
     touchAfter: 24 * 3600
 })
 
@@ -60,7 +60,7 @@ store.on("error", function(e){
 const sessionConfig = {
     store,
     name: 'session',
-    secret: 'abettersecret!',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -154,7 +154,7 @@ app.use((err, req, res, next) => {
     if (!err.message) err.message = 'Oh No, Something Went Wrong!'
     res.status(statusCode).render('error', { err })
 })
-
-app.listen(3000, () => {
-    console.log('Serving on port 3000')
+const port = process.env.PORT ||3000;
+app.listen(port, () => {
+    console.log(`Serving on port ${port}`)
 })
